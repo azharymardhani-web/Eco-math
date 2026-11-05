@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco-Maths: Kalkulator Kapasitas Sampah</title>
+    
+    <!-- Memuat Tailwind CSS untuk styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Memuat FontAwesome untuk Ikon -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Memuat font Inter dari Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        // Tema warna hijau organik (Eco)
+                        eco: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            900: '#14532d',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        
+        /* Animasi kartu pilihan bentuk */
+        .shape-card { 
+            transition: all 0.3s ease; 
+            cursor: pointer; 
+            border: 2px solid transparent; 
+        }
+        .shape-card:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); 
+        }
+        .shape-card.active { 
+            border-color: #22c55e; 
+            background-color: #f0fdf4; 
+        }
+        
+        /* Styling teks rumus */
+        .math-formula { 
+            font-family: 'Courier New', Courier, monospace; 
+            background: #e5e7eb; 
+            padding: 2px 6px; 
+            border-radius: 4px; 
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <nav class="bg-eco-700 text-white shadow-lg">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-leaf text-2xl text-eco-100"></i>
+                <div>
+                    <h1 class="text-xl font-bold leading-tight">Eco-Maths</h1>
+                    <p class="text-xs text-eco-100">Integrasi Bank Sampah & Geometri</p>
+                </div>
+            </div>
+            <div class="hidden sm:block text-sm font-medium bg-eco-900 px-3 py-1 rounded-full text-eco-50 border border-eco-600">
+                Alat Peraga LKPD Digital
+            </div>
+        </div>
+    </nav>
+
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="mb-8 text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2">Kalkulator Penampung Sampah</h2>
+            <p class="text-gray-600 max-w-2xl mx-auto">Gunakan alat ini untuk menghitung volume dan kapasitas tempat sampah di sekolah. Silakan ukur dengan meteran dan pilih bentuk tempat sampah yang sedang diteliti.</p>
+        </div>
+
+        <div class="grid md:grid-cols-12 gap-8">
+            
+            <!-- Kolom Kiri: Input Data -->
+            <div class="md:col-span-5 space-y-6">
+                
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <span class="bg-eco-100 text-eco-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">1</span>
+                        Pilih Bentuk Benda Konkret
+                    </h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="shape-card active p-3 rounded-xl text-center bg-gray-50 flex flex-col items-center gap-2" onclick="selectShape('kubus')" id="btn-kubus">
+                            <i class="fa-solid fa-cube text-3xl text-gray-500 mb-1" id="icon-kubus"></i>
+                            <span class="text-sm font-semibold">Kubus</span>
+                        </div>
+                        <div class="shape-card p-3 rounded-xl text-center bg-gray-50 flex flex-col items-center gap-2" onclick="selectShape('balok')" id="btn-balok">
+                            <i class="fa-solid fa-boxes-stacked text-3xl text-gray-500 mb-1" id="icon-balok"></i>
+                            <span class="text-sm font-semibold">Balok</span>
+                        </div>
+                        <div class="shape-card p-3 rounded-xl text-center bg-gray-50 flex flex-col items-center gap-2" onclick="selectShape('tabung')" id="btn-tabung">
+                            <i class="fa-solid fa-database text-3xl text-gray-500 mb-1" id="icon-tabung"></i>
+                            <span class="text-sm font-semibold">Tabung</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                        <span class="bg-eco-100 text-eco-700 w-8 h-8 rounded-full flex items-center justify-center text-sm">2</span>
+                        Masukkan Ukuran (cm)
+                    </h3>
+                    
+                    <form id="calc-form" onsubmit="event.preventDefault(); calculate();" class="space-y-4">
+                        
+                        <!-- Form Khusus Kubus -->
+                        <div id="input-kubus" class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Panjang Sisi (s)</label>
+                                <input type="number" id="sisi" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 focus:border-eco-500 outline-none transition" placeholder="Contoh: 40">
+                            </div>
+                        </div>
+
+                        <!-- Form Khusus Balok -->
+                        <div id="input-balok" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Panjang (p)</label>
+                                <input type="number" id="panjang" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 outline-none transition" placeholder="Contoh: 60">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Lebar (l)</label>
+                                <input type="number" id="lebar" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 outline-none transition" placeholder="Contoh: 40">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tinggi (t)</label>
+                                <input type="number" id="tinggi-balok" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 outline-none transition" placeholder="Contoh: 80">
+                            </div>
+                        </div>
+
+                        <!-- Form Khusus Tabung / Komposter Silinder -->
+                        <div id="input-tabung" class="space-y-4 hidden">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Jari-jari Alas (r)</label>
+                                <p class="text-xs text-gray-500 mb-2">Tips: Jika mengukur diameter, bagi nilainya dengan 2 untuk mendapat jari-jari.</p>
+                                <input type="number" id="jari-jari" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 outline-none transition" placeholder="Contoh: 30">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Tinggi Tabung (t)</label>
+                                <input type="number" id="tinggi-tabung" min="1" step="0.1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-eco-500 outline-none transition" placeholder="Contoh: 100">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-eco-600 hover:bg-eco-700 text-white font-bold py-3 px-4 rounded-xl transition duration-200 mt-6 shadow-md hover:shadow-lg flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-calculator"></i> Proses Kalkulasi
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan: Hasil -->
+            <div class="md:col-span-7">
+                <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg border border-eco-100 h-full relative overflow-hidden flex flex-col">
+                    <!-- Ornamen Background -->
+                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-eco-50 rounded-full opacity-50 z-0 pointer-events-none"></div>
+                    
+                    <div class="relative z-10 flex-grow">
+                        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2 border-b pb-4">
+                            <i class="fa-solid fa-clipboard-check text-eco-500 text-2xl"></i> Hasil Observasi & Kalkulasi
+                        </h3>
+
+                        <!-- State Kosong (Menunggu Input) -->
+                        <div id="empty-state" class="text-center py-16 flex flex-col items-center justify-center h-full">
+                            <div class="w-24 h-24 bg-eco-100 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa-solid fa-pencil text-3xl text-eco-500"></i>
+                            </div>
+                            <h4 class="text-lg font-semibold text-gray-700 mb-2">Menunggu Data Observasi</h4>
+                            <p class="text-gray-500 max-w-sm">Masukkan data ukuran fisik tempat sampah di sebelah kiri lalu klik "Proses Kalkulasi" untuk melihat pemecahan masalah.</p>
+                        </div>
+
+                        <!-- State Berisi Hasil -->
+                        <div id="result-state" class="hidden space-y-6">
+                            
+                            <!-- Seksi Matematika Murni -->
+                            <div class="bg-gray-50 rounded-xl p-5 border border-gray-200 shadow-sm">
+                                <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                                    <span class="bg-blue-100 text-blue-600 p-1.5 rounded-lg mr-2"><i class="fa-solid fa-square-root-variable"></i></span>
+                                    Tahapan Geometri
+                                </h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                                        <p class="text-sm text-gray-500 font-medium">Kapasitas Ruang / Volume (<span class="math-formula text-blue-600">V</span>)</p>
+                                        <div class="mt-2 pl-3 border-l-2 border-blue-200">
+                                            <p class="text-xs text-gray-400 font-mono" id="rumus-v-teks">Rumus</p>
+                                            <p class="font-mono text-sm mt-1 text-gray-700" id="rumus-v-langkah">Langkah</p>
+                                        </div>
+                                        <p class="text-xl font-black mt-3 text-blue-700"><span id="hasil-v">0</span> <span class="text-sm font-medium text-gray-500">cm³</span></p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg border border-gray-100 shadow-sm">
+                                        <p class="text-sm text-gray-500 font-medium">Bahan Pembuatan / Luas Permukaan (<span class="math-formula text-purple-600">L</span>)</p>
+                                        <div class="mt-2 pl-3 border-l-2 border-purple-200">
+                                            <p class="text-xs text-gray-400 font-mono" id="rumus-l-teks">Rumus</p>
+                                            <p class="font-mono text-sm mt-1 text-gray-700" id="rumus-l-langkah">Langkah</p>
+                                        </div>
+                                        <p class="text-xl font-black mt-3 text-purple-700"><span id="hasil-l">0</span> <span class="text-sm font-medium text-gray-500">cm²</span></p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Seksi Aplikasi Dunia Nyata (Bank Sampah) -->
+                            <div class="bg-eco-50 rounded-xl p-5 border border-eco-200 shadow-sm">
+                                <h4 class="font-semibold text-eco-900 mb-4 flex items-center">
+                                    <span class="bg-eco-200 text-eco-700 p-1.5 rounded-lg mr-2"><i class="fa-solid fa-recycle"></i></span>
+                                    Analisis Daya Tampung (Bank Sampah)
+                                </h4>
+                                
+                                <div class="flex flex-col sm:flex-row items-center justify-between mb-4 bg-white p-4 rounded-lg shadow-sm border border-eco-100">
+                                    <div class="text-center sm:text-left mb-2 sm:mb-0">
+                                        <p class="text-sm font-bold text-gray-700">Total Kapasitas (Liter)</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">Konversi: Volume cm³ ÷ 1000</p>
+                                    </div>
+                                    <div class="text-3xl font-black text-eco-600 bg-eco-50 px-4 py-2 rounded-lg">
+                                        <span id="hasil-liter">0</span> <span class="text-lg">L</span>
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                    <div class="bg-white p-4 rounded-lg border-l-4 border-yellow-400 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="bg-yellow-50 p-1.5 rounded-md"><i class="fa-solid fa-bottle-water text-yellow-500"></i></div>
+                                            <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Sampah Plastik Ringan</span>
+                                        </div>
+                                        <p class="text-xl font-black text-gray-800"><span id="est-plastik">0</span> kg</p>
+                                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">*Estimasi daya tampung botol plastik/kertas tidak dipress (~30 kg/m³)</p>
+                                    </div>
+                                    <div class="bg-white p-4 rounded-lg border-l-4 border-emerald-500 shadow-sm">
+                                        <div class="flex items-center gap-2 mb-2">
+                                            <div class="bg-emerald-50 p-1.5 rounded-md"><i class="fa-solid fa-seedling text-emerald-500"></i></div>
+                                            <span class="text-xs font-bold text-gray-700 uppercase tracking-wide">Sampah Organik (Kompos)</span>
+                                        </div>
+                                        <p class="text-xl font-black text-gray-800"><span id="est-organik">0</span> kg</p>
+                                        <p class="text-[10px] text-gray-400 mt-1 leading-tight">*Estimasi daya tampung untuk sampah daun/sisa makanan (~300 kg/m³)</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Box Kesimpulan -->
+                            <div class="bg-blue-50 text-blue-900 p-4 rounded-xl text-sm flex gap-3 shadow-inner border border-blue-100">
+                                <i class="fa-solid fa-lightbulb text-xl mt-0.5 text-blue-500"></i>
+                                <div>
+                                    <strong class="block mb-1">Kesimpulan Observasi:</strong>
+                                    <p id="kesimpulan-teks" class="leading-relaxed">
+                                        Menghitung rekomendasi penempatan...
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // State global untuk melacak bentuk yang dipilih
+        let currentShape = 'kubus';
+
+        // Fungsi untuk mengganti tampilan formulir berdasarkan bentuk
+        function selectShape(shape) {
+            currentShape = shape;
+            
+            // 1. Reset tampilan semua tombol bentuk
+            document.querySelectorAll('.shape-card').forEach(card => {
+                card.classList.remove('active');
+                card.querySelector('i').classList.replace('text-eco-600', 'text-gray-500');
+            });
+            
+            // Sembunyikan semua input form
+            document.querySelectorAll('[id^="input-"]').forEach(el => el.classList.add('hidden'));
+
+            // 2. Aktifkan tampilan tombol yang dipilih
+            const selectedCard = document.getElementById(`btn-${shape}`);
+            selectedCard.classList.add('active');
+            selectedCard.querySelector('i').classList.replace('text-gray-500', 'text-eco-600');
+            
+            // Tampilkan input form yang sesuai
+            document.getElementById(`input-${shape}`).classList.remove('hidden');
+
+            // 3. Reset panel hasil ke state kosong
+            document.getElementById('empty-state').classList.remove('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+        }
+
+        // Fungsi utilitas untuk memformat angka dengan pemisah ribuan ala Indonesia
+        function formatNumber(num) {
+            return new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 }).format(num);
+        }
+
+        // Fungsi kustom untuk menampilkan pesan error alih-alih menggunakan alert() bawaan
+        function showError(message) {
+            // Kita bisa menggunakan custom modal, tapi untuk kesederhanaan manipulasi DOM di sini,
+            // kita ubah konten empty state menjadi pesan peringatan.
+            const emptyState = document.getElementById('empty-state');
+            emptyState.innerHTML = `
+                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <i class="fa-solid fa-triangle-exclamation text-2xl text-red-500"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-red-600 mb-2">Input Tidak Valid</h4>
+                <p class="text-gray-600 text-sm max-w-sm mx-auto">${message}</p>
+                <button onclick="resetEmptyState()" class="mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition">Kembali</button>
+            `;
+            emptyState.classList.remove('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+        }
+        
+        // Mengembalikan tampilan empty state ke normal
+        function resetEmptyState() {
+             const emptyState = document.getElementById('empty-state');
+             emptyState.innerHTML = `
+                <div class="w-24 h-24 bg-eco-100 rounded-full flex items-center justify-center mb-4 mx-auto">
+                    <i class="fa-solid fa-pencil text-3xl text-eco-500"></i>
+                </div>
+                <h4 class="text-lg font-semibold text-gray-700 mb-2">Menunggu Data Observasi</h4>
+                <p class="text-gray-500 max-w-sm mx-auto">Masukkan data ukuran fisik tempat sampah di sebelah kiri lalu klik "Proses Kalkulasi" untuk melihat pemecahan masalah.</p>
+             `;
+        }
+
+        // Fungsi utama untuk melakukan kalkulasi
+        function calculate() {
+            let v = 0; // volume dalam cm3
+            let l = 0; // luas permukaan dalam cm2
+            let stepsV = "";
+            let stepsL = "";
+            let textRumusV = "";
+            let textRumusL = "";
+
+            // Kalkulasi untuk Kubus
+            if (currentShape === 'kubus') {
+                const s = parseFloat(document.getElementById('sisi').value);
+                if(isNaN(s) || s <= 0) return showError("Silakan masukkan nilai panjang sisi yang benar dan lebih dari nol.");
+                
+                v = Math.pow(s, 3);
+                l = 6 * Math.pow(s, 2);
+                
+                textRumusV = "V = s × s × s";
+                stepsV = `V = ${s} × ${s} × ${s}`;
+                
+                textRumusL = "L = 6 × s²";
+                stepsL = `L = 6 × (${s} × ${s})`;
+            } 
+            // Kalkulasi untuk Balok
+            else if (currentShape === 'balok') {
+                const p = parseFloat(document.getElementById('panjang').value);
+                const lb = parseFloat(document.getElementById('lebar').value);
+                const t = parseFloat(document.getElementById('tinggi-balok').value);
+                
+                if(isNaN(p) || isNaN(lb) || isNaN(t) || p<=0 || lb<=0 || t<=0) {
+                    return showError("Pastikan panjang, lebar, dan tinggi balok diisi dengan angka yang valid.");
+                }
+
+                v = p * lb * t;
+                l = 2 * ((p*lb) + (p*t) + (lb*t));
+
+                textRumusV = "V = p × l × t";
+                stepsV = `V = ${p} × ${lb} × ${t}`;
+
+                textRumusL = "L = 2 × (p.l + p.t + l.t)";
+                stepsL = `L = 2 × ((${p}×${lb}) + (${p}×${t}) + (${lb}×${t}))`;
+            }
+            // Kalkulasi untuk Tabung
+            else if (currentShape === 'tabung') {
+                const r = parseFloat(document.getElementById('jari-jari').value);
+                const t = parseFloat(document.getElementById('tinggi-tabung').value);
+                
+                if(isNaN(r) || isNaN(t) || r<=0 || t<=0) {
+                    return showError("Pastikan jari-jari dan tinggi tabung diisi dengan angka yang valid.");
+                }
+
+                // Logika pemilihan pi untuk edukasi (22/7 jika kelipatan 7)
+                const isMultipleOf7 = (r % 7 === 0);
+                const pi = isMultipleOf7 ? (22/7) : 3.14;
+                const piStr = isMultipleOf7 ? "22/7" : "3.14";
+
+                v = pi * r * r * t;
+                // Asumsi tempat sampah dengan tutup (tabung utuh)
+                l = 2 * pi * r * (r + t); 
+
+                textRumusV = "V = π × r² × t";
+                stepsV = `V = ${piStr} × ${r}² × ${t}`;
+
+                textRumusL = "L = 2 × π × r × (r + t)";
+                stepsL = `L = 2 × ${piStr} × ${r} × (${r} + ${t})`;
+            }
+
+            
+            // Konversi Liter (1 Liter = 1000 cm3)
+            const liter = v / 1000;
+            
+            // Konversi ke Meter Kubik untuk hitungan massa
+            const volumeM3 = v / 1000000; 
+            
+            // Asumsi densitas untuk modul edukasi Bank Sampah:
+            // 1. Plastik botol tidak dipress (sangat rongga): ~30 kg per m³
+            // 2. Sampah organik (padat/kompos): ~300 kg per m³
+            const estPlastik = volumeM3 * 30;
+            const estOrganik = volumeM3 * 300;
+
+            // Injeksi hasil matematika ke DOM
+            document.getElementById('rumus-v-teks').innerText = textRumusV;
+            document.getElementById('rumus-v-langkah').innerText = stepsV;
+            document.getElementById('hasil-v').innerText = formatNumber(v);
+
+            document.getElementById('rumus-l-teks').innerText = textRumusL;
+            document.getElementById('rumus-l-langkah').innerText = stepsL;
+            document.getElementById('hasil-l').innerText = formatNumber(l);
+
+            // Injeksi hasil bank sampah ke DOM
+            document.getElementById('hasil-liter').innerText = formatNumber(liter);
+            document.getElementById('est-plastik').innerText = formatNumber(estPlastik);
+            document.getElementById('est-organik').innerText = formatNumber(estOrganik);
+
+            // Logika Penentuan Kesimpulan Edukatif
+            let rekomendasi = `Berdasarkan perhitungan geometri, penampung ini memiliki daya tampung sebesar <b>${formatNumber(liter)} Liter</b>. `;
+            
+            if (liter >= 120) {
+                rekomendasi += "Kapasitas ini <b>Sangat Besar</b>. Tempat sampah ini sangat ideal ditempatkan di <b>Area TPS Utama Sekolah</b> atau Kantin Sentral yang memproduksi volume limbah tinggi setiap harinya. Perhatikan luas permukaannya, karena akan butuh banyak material pembuatannya.";
+            } else if (liter >= 40) {
+                rekomendasi += "Kapasitas ini <b>Sedang</b>. Penampung berukuran menengah ini cocok ditempatkan di <b>koridor antar kelas</b> atau dekat ruang guru, tempat lalu lalang siswa.";
+            } else {
+                rekomendasi += "Kapasitas ini <b>Kecil</b>. Ini adalah tempat sampah individual yang sangat sesuai diletakkan di <b>dalam sudut ruang kelas</b> agar tidak memakan banyak tempat, namun harus sering dikosongkan.";
+            }
+            
+            document.getElementById('kesimpulan-teks').innerHTML = rekomendasi;
+
+            // Transisi UI (Tampilkan Hasil, Sembunyikan Empty State)
+            resetEmptyState(); // mengembalikan state awal jika sebelumnya error
+            document.getElementById('empty-state').classList.add('hidden');
+            document.getElementById('result-state').classList.remove('hidden');
+        }
+
+        // Panggil inisialisasi awal saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            selectShape('kubus');
+        });
+    </script>
+</body>
+</html>
